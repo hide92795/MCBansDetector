@@ -1,0 +1,8 @@
+APIKey: test
+Country:
+ - KR
+LocalCountry:
+  ID: JP
+  Name: Japan
+Language: jp
+ProtectModeOnLaunch: true
