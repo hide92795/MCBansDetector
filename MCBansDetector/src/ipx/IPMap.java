@@ -3,6 +3,8 @@ package ipx;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -12,6 +14,11 @@ public class IPMap {
 
 	public IPMap(File file) throws Exception {
 		this.mapping = generateFromFile(file);
+		createLocal();
+	}
+
+	public IPMap(InputStream is) throws Exception {
+		this.mapping = generateFromInputStream(is);
 		createLocal();
 	}
 
@@ -54,6 +61,31 @@ public class IPMap {
 		TreeMap<Long, IPRange> mapping = new TreeMap<Long, IPRange>();
 
 		BufferedReader br = new BufferedReader(new FileReader(file));
+
+		try {
+			String line;
+			while ((line = br.readLine()) != null) {
+				String[] strs = line.split(",");
+				IPRange range;
+				if (strs.length == 4) {
+					range = new IPRange(strs[0], strs[1], strs[2], strs[3]);
+				} else {
+					range = new IPRange(strs[0], strs[1], strs[2]);
+				}
+
+				mapping.put(new Long(range.getStart().toLong()), range);
+			}
+		} finally {
+			br.close();
+		}
+
+		return mapping;
+	}
+
+	private TreeMap<Long, IPRange> generateFromInputStream(InputStream is) throws Exception {
+		TreeMap<Long, IPRange> mapping = new TreeMap<Long, IPRange>();
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
 		try {
 			String line;

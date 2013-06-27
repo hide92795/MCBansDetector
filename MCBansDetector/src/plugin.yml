@@ -1,6 +1,6 @@
 name: MCBansDetector
 main: hide92795.bukkit.plugin.mcbansdetector.MCBansDetector
-version: 1.5.2_1
+version: 1.5.2_2
 description: Check baned player
 author: hide92795
 depend: [hide92795CoreLib]

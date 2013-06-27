@@ -85,7 +85,7 @@ public class MCBansDetector extends JavaPlugin {
 
 		try {
 			// IPMapping
-			ipmap = new IPMap(new File(getDataFolder(), "ip_country_mapping.csv"));
+			ipmap = new IPMap(getResource("ip_country_mapping.csv"));
 		} catch (Exception e) {
 			logger.severe("Error on loading ipmap from file.");
 			e.printStackTrace();
