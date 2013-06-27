@@ -267,7 +267,7 @@ public class MCBansDetector extends JavaPlugin {
 				sb.append("\n");
 				sb.append(localize.getString(Type.GET_NEXT_PAGE));
 				sb.append(ChatColor.GOLD);
-				sb.append("/md list ");
+				sb.append("/mcbansdetector-list ");
 				sb.append(page + 1);
 			}
 			sender.sendMessage(sb.toString());
@@ -345,7 +345,7 @@ public class MCBansDetector extends JavaPlugin {
 
 				sb.append(String.format(localize.getString(Type.WARN_PLAYER_LOGIN), warnData.size()));
 				sb.append("\n");
-				sb.append(String.format(localize.getString(Type.PLEASE_CHECK_DETAIL), "/md list"));
+				sb.append(String.format(localize.getString(Type.PLEASE_CHECK_DETAIL), "/mcbansdetector-list"));
 				if (currentLogin.length() != 0) {
 					sb.append("\n");
 					sb.append(localize.getString(Type.CURRENT_LOGIN_WARN_PLAYER));
