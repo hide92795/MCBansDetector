@@ -43,6 +43,6 @@ public class MCBansDetectorAPI {
 	}
 
 	public boolean isPlayerWarned(String player) {
-		return plugin.warnNames.contains(player);
+		return plugin.warnNames.containsKey(player);
 	}
 }

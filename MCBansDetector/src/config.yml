@@ -6,3 +6,4 @@ LocalCountry:
   Name: Japan
 Language: jp
 ProtectModeOnLaunch: true
+EnableSideBar: true

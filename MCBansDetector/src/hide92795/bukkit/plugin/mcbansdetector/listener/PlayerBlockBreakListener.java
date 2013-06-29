@@ -1,7 +1,7 @@
 package hide92795.bukkit.plugin.mcbansdetector.listener;
 
 import hide92795.bukkit.plugin.mcbansdetector.MCBansDetector;
-import org.bukkit.ChatColor;
+import hide92795.bukkit.plugin.mcbansdetector.Type;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,7 +21,7 @@ public class PlayerBlockBreakListener implements Listener {
 			Player player = event.getPlayer();
 			if (plugin.getAPI().isPlayerWarned(player)) {
 				event.setCancelled(true);
-				player.sendMessage(ChatColor.RED + plugin.getConfig().getString("BlockBreakMessage"));
+				player.sendMessage(plugin.localize.getString(Type.BLOCK_BREAK_MESSAGE));
 			}
 		}
 	}

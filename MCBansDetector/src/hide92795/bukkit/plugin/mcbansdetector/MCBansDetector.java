@@ -8,6 +8,8 @@ import hide92795.bukkit.plugin.mcbansdetector.data.MCBansErrorData;
 import hide92795.bukkit.plugin.mcbansdetector.data.WarnCountryData;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerBlockBreakListener;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLoginListener;
+import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLogoutListener;
+import hide92795.bukkit.plugin.mcbansdetector.sidebar.SideBarManager;
 import ipx.IP;
 import ipx.IPMap;
 import ipx.IPRange;
@@ -15,7 +17,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -27,17 +28,19 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MCBansDetector extends JavaPlugin {
+	private MCBansDetectorAPI api;
+	private MessageFactory messageFactory;
 	protected Logger logger;
+	private Usage usage;
+	public Localize localize;
 	private PrintWriter printwriter;
 	protected IPMap ipmap;
 	private List<String> countryList;
 	private HashMap<Integer, Data> warnData;
-	protected HashSet<String> warnNames;
-	private MCBansDetectorAPI api;
-	private MessageFactory messageFactory;
+	public HashMap<String, Integer> warnNames;
 	public boolean enableProtect;
-	private Usage usage;
-	public Localize localize;
+	private boolean enableSideBar;
+	private SideBarManager sidebar;
 
 	@Override
 	public void onEnable() {
@@ -45,20 +48,22 @@ public class MCBansDetector extends JavaPlugin {
 		saveConfig();
 		reloadConfig();
 		logger = getLogger();
-		api = new MCBansDetectorAPI(this);
-		messageFactory = new MessageFactory(this);
 		localize = new Localize(this);
-		warnData = new HashMap<>();
-		warnNames = new HashSet<>();
 		try {
 			reload();
 		} catch (Exception e1) {
 			logger.severe("Error has occured on loading config.");
 		}
+		api = new MCBansDetectorAPI(this);
+		messageFactory = new MessageFactory(this);
+		warnData = new HashMap<>();
+		warnNames = new HashMap<>();
+		sidebar = new SideBarManager(this);
 
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new PlayerLoginListener(this), this);
 		pm.registerEvents(new PlayerBlockBreakListener(this), this);
+		pm.registerEvents(new PlayerLogoutListener(this), this);
 
 
 		try {
@@ -95,8 +100,7 @@ public class MCBansDetector extends JavaPlugin {
 
 	private void createUsage() {
 		usage = new Usage(this);
-		usage.addCommand("/mcbansdetector-list [" + localize.getString(Type.PAGE) + "]",
-				localize.getString(Type.SHOW_LIST));
+		usage.addCommand("/mcbansdetector-list [" + localize.getString(Type.PAGE) + "]", localize.getString(Type.SHOW_LIST));
 		usage.addCommand("/mcbansdetector-show <ID>", localize.getString(Type.SHOW_DETAIL));
 		usage.addCommand("/mcbansdetector-protect", localize.getString(Type.TOGGLE_PROTECT));
 		usage.addCommand("/mcbansdetector-reload", localize.getString(Type.RELOAD_SETTING));
@@ -189,6 +193,7 @@ public class MCBansDetector extends JavaPlugin {
 			}
 		}
 		enableProtect = getConfig().getBoolean("ProtectModeOnLaunch");
+		enableSideBar = getConfig().getBoolean("EnableSideBar");
 		countryList = getConfig().getStringList("Country");
 		if (countryList == null) {
 			countryList = new ArrayList<>();
@@ -285,8 +290,7 @@ public class MCBansDetector extends JavaPlugin {
 	public synchronized void resultMCBans(String playerName, MCBansData data) {
 		logger.info(messageFactory.createMCBansMessageForConsoleLogger(playerName, data));
 		if (data.getTotalBan() != 0) {
-			warnData.put(warnData.size() + 1, data);
-			warnNames.add(playerName);
+			warn(playerName, data);
 			printwriter.write(messageFactory.createMCBansMessageForOriginalLogger(playerName, data));
 			sendMessageToOperator(messageFactory.createMCBansMessageForModerator(playerName, data));
 		}
@@ -295,8 +299,7 @@ public class MCBansDetector extends JavaPlugin {
 
 	public synchronized void errorOnMCBans(String playerName) {
 		logger.info(messageFactory.createMCBansErrorMessageForConsoleLogger(playerName));
-		warnData.put(warnData.size() + 1, new MCBansErrorData(Utils.getCurrentTime("yyyy/MM/dd HH:mm:ss"), playerName));
-		warnNames.add(playerName);
+		warn(playerName, new MCBansErrorData(Utils.getCurrentTime("yyyy/MM/dd HH:mm:ss"), playerName));
 		printwriter.write(messageFactory.createMCBansErrorMessageForOriginalLogger(playerName));
 		sendMessageToOperator(messageFactory.createMCBansErrorMessageForModerator(playerName));
 	}
@@ -312,10 +315,8 @@ public class MCBansDetector extends JavaPlugin {
 
 			if (countryList.contains(range.getId())) {
 				// Warn
-				WarnCountryData data = new WarnCountryData(Utils.getCurrentTime("yyyy/MM/dd HH:mm:ss"), playerName,
-						countryDesc, ip.toString());
-				warnData.put(warnData.size() + 1, data);
-				warnNames.add(playerName);
+				WarnCountryData data = new WarnCountryData(Utils.getCurrentTime("yyyy/MM/dd HH:mm:ss"), playerName, countryDesc, ip.toString());
+				warn(playerName, data);
 
 				printwriter.write(messageFactory.createWarnCountryMessageForOriginalLogger(playerName, countryDesc));
 				sendMessageToOperator(messageFactory.createWarnCountryMessageForModerator(playerName, countryDesc, ip));
@@ -334,6 +335,10 @@ public class MCBansDetector extends JavaPlugin {
 	}
 
 	public void checkCurrentWarnPlayerForModerator(Player player) {
+		if (player.hasPermission("mcbansdetector.sidebar")) {
+			updateSidebar();
+		}
+
 		if (player.hasPermission("mcbansdetector.notice") || player.isOp()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(ChatColor.RED);
@@ -363,7 +368,7 @@ public class MCBansDetector extends JavaPlugin {
 		Player[] players = Bukkit.getOnlinePlayers();
 		for (Player player : players) {
 			String name = player.getName();
-			if (warnNames.contains(name)) {
+			if (warnNames.containsKey(name)) {
 				sb.append(", ");
 				sb.append(ChatColor.YELLOW);
 				sb.append(name);
@@ -380,4 +385,20 @@ public class MCBansDetector extends JavaPlugin {
 		return api;
 	}
 
+	private void warn(String player, Data data) {
+		warnData.put(warnData.size() + 1, data);
+		int count = 0;
+		if (warnNames.containsKey(player)) {
+			count = warnNames.get(player);
+		}
+		count++;
+		warnNames.put(player, count);
+		updateSidebar();
+	}
+
+	public void updateSidebar() {
+		if (enableSideBar) {
+			sidebar.update();
+		}
+	}
 }

@@ -21,7 +21,7 @@ public class PlayerLoginListener implements Listener {
 		// Notice to Moderator
 		plugin.checkCurrentWarnPlayerForModerator(player);
 
-		if (!player.hasPermission("mcbansdetector.ignore")) {
+		if (player.hasPermission("mcbansdetector.ignore") || player.isOp()) {
 			plugin.getLogger().info("Skipping check player: " + playerName);
 			return;
 		}
