@@ -9,6 +9,7 @@ import hide92795.bukkit.plugin.mcbansdetector.data.WarnCountryData;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerBlockBreakListener;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLoginListener;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLogoutListener;
+import hide92795.bukkit.plugin.mcbansdetector.remoteadmin.MCBasnDetectorRemoteAdminRegister;
 import hide92795.bukkit.plugin.mcbansdetector.sidebar.SideBarManager;
 import ipx.IP;
 import ipx.IPMap;
@@ -65,6 +66,7 @@ public class MCBansDetector extends JavaPlugin {
 		pm.registerEvents(new PlayerBlockBreakListener(this), this);
 		pm.registerEvents(new PlayerLogoutListener(this), this);
 
+		checkRemoteAdmin();
 
 		try {
 			// Log
@@ -96,6 +98,13 @@ public class MCBansDetector extends JavaPlugin {
 			e.printStackTrace();
 		}
 		logger.info("MCBansDetector enabled!");
+	}
+
+	private void checkRemoteAdmin() {
+		if (getServer().getPluginManager().isPluginEnabled("RemoteAdmin")) {
+			MCBasnDetectorRemoteAdminRegister.register(this);
+			getLogger().info("Hook into RemoteAdmin");
+		}
 	}
 
 	private void createUsage() {
@@ -379,6 +388,23 @@ public class MCBansDetector extends JavaPlugin {
 			sb.delete(0, 2);
 		}
 		return sb;
+	}
+
+	public String getLocalizedMessageForRemoteAdminAdditionalInfo() {
+		StringBuilder sb = new StringBuilder();
+		if (warnData.size() == 0) {
+			sb.append(localize.getString(Type.NO_WARN_PLAYER_LOGIN));
+		} else {
+			StringBuilder currentLogin = getCurrentLoginPlayersName();
+			sb.append(String.format(localize.getString(Type.WARN_PLAYER_LOGIN), warnData.size()));
+			if (currentLogin.length() != 0) {
+				sb.append("\n");
+				sb.append(localize.getString(Type.CURRENT_LOGIN_WARN_PLAYER));
+				sb.append("\n");
+				sb.append(currentLogin);
+			}
+		}
+		return sb.toString();
 	}
 
 	public MCBansDetectorAPI getAPI() {
