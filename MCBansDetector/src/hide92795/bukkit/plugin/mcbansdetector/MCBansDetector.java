@@ -9,7 +9,7 @@ import hide92795.bukkit.plugin.mcbansdetector.data.WarnCountryData;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerBlockBreakListener;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLoginListener;
 import hide92795.bukkit.plugin.mcbansdetector.listener.PlayerLogoutListener;
-import hide92795.bukkit.plugin.mcbansdetector.remoteadmin.MCBasnDetectorRemoteAdminRegister;
+import hide92795.bukkit.plugin.mcbansdetector.remotecontroller.MCBasnDetectorRemoteControllerRegister;
 import hide92795.bukkit.plugin.mcbansdetector.sidebar.SideBarManager;
 import ipx.IP;
 import ipx.IPMap;
@@ -66,7 +66,7 @@ public class MCBansDetector extends JavaPlugin {
 		pm.registerEvents(new PlayerBlockBreakListener(this), this);
 		pm.registerEvents(new PlayerLogoutListener(this), this);
 
-		checkRemoteAdmin();
+		checkRemoteController();
 
 		try {
 			// Log
@@ -100,10 +100,10 @@ public class MCBansDetector extends JavaPlugin {
 		logger.info("MCBansDetector enabled!");
 	}
 
-	private void checkRemoteAdmin() {
-		if (getServer().getPluginManager().isPluginEnabled("RemoteAdmin")) {
-			MCBasnDetectorRemoteAdminRegister.register(this);
-			getLogger().info("Hook into RemoteAdmin");
+	private void checkRemoteController() {
+		if (getServer().getPluginManager().isPluginEnabled("RemoteController")) {
+			MCBasnDetectorRemoteControllerRegister.register(this);
+			getLogger().info("Hook into RemoteController");
 		}
 	}
 

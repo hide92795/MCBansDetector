@@ -1,8 +1,8 @@
-package hide92795.bukkit.plugin.mcbansdetector.remoteadmin;
+package hide92795.bukkit.plugin.mcbansdetector.remotecontroller;
 
 import hide92795.bukkit.plugin.mcbansdetector.MCBansDetector;
-import hide92795.bukkit.plugin.remoteadmin.api.AdditionalInfo;
-import hide92795.bukkit.plugin.remoteadmin.api.AdditionalInfoCreator;
+import hide92795.bukkit.plugin.remotecontroller.api.AdditionalInfo;
+import hide92795.bukkit.plugin.remotecontroller.api.AdditionalInfoCreator;
 
 public class MCBansDetectorInfoCreator implements AdditionalInfoCreator {
 	private MCBansDetector plugin;
