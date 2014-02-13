@@ -38,7 +38,7 @@ public class MCBansDetector extends JavaPlugin {
 	protected IPMap ipmap;
 	private List<String> countryList;
 	private HashMap<Integer, Data> warnData;
-	public HashMap<String, Integer> warnNames;
+	public HashMap<String, Integer> warnCounts;
 	public boolean enableProtect;
 	private boolean enableSideBar;
 	private SideBarManager sidebar;
@@ -58,7 +58,7 @@ public class MCBansDetector extends JavaPlugin {
 		api = new MCBansDetectorAPI(this);
 		messageFactory = new MessageFactory(this);
 		warnData = new HashMap<>();
-		warnNames = new HashMap<>();
+		warnCounts = new HashMap<>();
 		sidebar = new SideBarManager(this);
 
 		PluginManager pm = this.getServer().getPluginManager();
@@ -377,7 +377,7 @@ public class MCBansDetector extends JavaPlugin {
 		Player[] players = Bukkit.getOnlinePlayers();
 		for (Player player : players) {
 			String name = player.getName();
-			if (warnNames.containsKey(name)) {
+			if (warnCounts.containsKey(name)) {
 				sb.append(", ");
 				sb.append(ChatColor.YELLOW);
 				sb.append(name);
@@ -414,11 +414,11 @@ public class MCBansDetector extends JavaPlugin {
 	private void warn(String player, Data data) {
 		warnData.put(warnData.size() + 1, data);
 		int count = 0;
-		if (warnNames.containsKey(player)) {
-			count = warnNames.get(player);
+		if (warnCounts.containsKey(player)) {
+			count = warnCounts.get(player);
 		}
 		count++;
-		warnNames.put(player, count);
+		warnCounts.put(player, count);
 		updateSidebar();
 	}
 

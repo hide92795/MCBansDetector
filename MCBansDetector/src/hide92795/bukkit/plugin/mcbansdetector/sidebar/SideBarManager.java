@@ -41,13 +41,17 @@ public class SideBarManager {
 
 		boolean zero = true;
 
-		Set<String> warnplayers = plugin.warnNames.keySet();
+		Set<String> warnplayers = plugin.warnCounts.keySet();
 		for (String name : warnplayers) {
 			if (Bukkit.getPlayerExact(name) != null) {
 				zero = false;
+				if (name.length() >= 13) {
+					name = name.substring(0, 10);
+					name = name + "...";
+				}
 				String disp = String.format(plugin.localize.getString(Type.SIDEBAR_PLAYER_NAME), name);
 				Score score = objective.getScore(Bukkit.getOfflinePlayer(disp));
-				score.setScore(plugin.warnNames.get(name));
+				score.setScore(plugin.warnCounts.get(name));
 			}
 		}
 		if (zero) {
