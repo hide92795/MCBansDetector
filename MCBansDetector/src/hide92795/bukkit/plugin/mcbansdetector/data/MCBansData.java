@@ -6,9 +6,9 @@ import org.bukkit.ChatColor;
 
 public class MCBansData extends Data {
 	private final int totalBan;
-	private final int reputation;
+	private final double reputation;
 
-	public MCBansData(String date, String name, int totalBan, int reputation) {
+	public MCBansData(String date, String name, int totalBan, double reputation) {
 		super(date, name);
 		this.totalBan = totalBan;
 		this.reputation = reputation;
@@ -33,7 +33,7 @@ public class MCBansData extends Data {
 		return totalBan;
 	}
 
-	public int getReputation() {
+	public double getReputation() {
 		return reputation;
 	}
 

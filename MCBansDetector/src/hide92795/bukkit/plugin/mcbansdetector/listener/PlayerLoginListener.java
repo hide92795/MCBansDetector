@@ -1,6 +1,7 @@
 package hide92795.bukkit.plugin.mcbansdetector.listener;
 
 import hide92795.bukkit.plugin.mcbansdetector.MCBansDetector;
+import hide92795.bukkit.plugin.mcbansdetector.Type;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,8 +27,13 @@ public class PlayerLoginListener implements Listener {
 			return;
 		}
 
+		if (!plugin.valid_config) {
+			plugin.getLogger().warning(String.format(plugin.localize.getString(Type.INVALID_CONFIG), playerName));
+			return;
+		}
+
 		// IPcheck
 		plugin.checkCountry(player);
-		plugin.checkMCBans(playerName);
+		plugin.checkMCBans(player);
 	}
 }

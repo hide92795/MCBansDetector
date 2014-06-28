@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -42,6 +43,8 @@ public class MCBansDetector extends JavaPlugin {
 	public boolean enableProtect;
 	private boolean enableSideBar;
 	private SideBarManager sidebar;
+	public OfflinePlayer admin;
+	public boolean valid_config;
 
 	@Override
 	public void onEnable() {
@@ -204,6 +207,7 @@ public class MCBansDetector extends JavaPlugin {
 		enableProtect = getConfig().getBoolean("ProtectModeOnLaunch");
 		enableSideBar = getConfig().getBoolean("EnableSideBar");
 		countryList = getConfig().getStringList("Country");
+		admin = getServer().getOfflinePlayer(getConfig().getString("AdminPlayerName"));
 		if (countryList == null) {
 			countryList = new ArrayList<>();
 			getConfig().set("Country", countryList);
@@ -218,6 +222,20 @@ public class MCBansDetector extends JavaPlugin {
 		sb1.delete(sb1.length() - 2, sb1.length() - 1);
 		logger.info(sb1.toString());
 		createUsage();
+		checkValidConfig();
+	}
+
+	private void checkValidConfig() {
+		valid_config = false;
+		if (getConfig().getString("APIKey").trim().length() == 40) {
+			if (admin != null) {
+				valid_config = true;
+			} else {
+				logger.warning(localize.getString(Type.INVALID_ADMIN_NAME));
+			}
+		} else {
+			logger.warning(localize.getString(Type.INVALID_API_KEY));
+		}
 	}
 
 	private void sendData(CommandSender sender, Data data) {
@@ -291,9 +309,9 @@ public class MCBansDetector extends JavaPlugin {
 	}
 
 
-	public void checkMCBans(String playerName) {
-		logger.info("Starting to check \"" + playerName + "\" from MCBans");
-		getServer().getScheduler().runTask(this, new CheckMCBansThread(this, playerName));
+	public void checkMCBans(Player player) {
+		logger.info("Starting to check \"" + player.getName() + "\" from MCBans");
+		getServer().getScheduler().runTask(this, new CheckMCBansThread(this, player.getName(), player.getUniqueId().toString()));
 	}
 
 	public synchronized void resultMCBans(String playerName, MCBansData data) {

@@ -25,7 +25,10 @@ public class SideBarManager {
 		Player[] players = plugin.getServer().getOnlinePlayers();
 		for (Player player : players) {
 			if (player.hasPermission("mcbansdetector.sidebar") || player.isOp()) {
-				player.setScoreboard(scoreboard);
+				try {
+					player.setScoreboard(scoreboard);
+				} catch (Exception e) {
+				}
 			}
 		}
 	}
